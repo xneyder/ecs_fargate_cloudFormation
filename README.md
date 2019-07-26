@@ -6,6 +6,6 @@ Then using cloudformation we are going to create all the infrastructure that wil
 
 Here is a diagram of what we are going to build:
 
-
+![alt text](https://github.com/xneyder/ecs_fargate_cloudFormation/blob/master/diagram1.png)
 
 

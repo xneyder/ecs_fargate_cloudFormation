@@ -8,7 +8,7 @@ The purpose of this repository is to be able to build from a single script all t
 
 We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is reached it will trigger and autoscalling target to scale out adding more tasks, and in the other direction if the alarm is cleared it will trigger the scale in to remove ECS tasks.
 
-##CloudFormation Templates
+## CloudFormation Templates
 ### 1. vpc.yml
 -VPC
 -2 public subnets in 2 availability zones
@@ -43,7 +43,7 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 -CodeBuild
 -CodePipeline
 
-##Scripts
+## Scripts
 ### 1. deploy_system.py
 Main script that creates the image and builds the stacks on AWS
 ### 2. docker_image.sh
@@ -55,7 +55,7 @@ Consumes messages from the SQS queue in order to test the CloudWatch alarm and s
 ### 5. destroy_system.py
 Deletes the docker images and the AWS stacks
 
-##Deploy to AWS
+## Deploy to AWS
 ### 0. Prerequisites
 
 - python 2.7

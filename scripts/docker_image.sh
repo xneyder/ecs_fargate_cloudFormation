@@ -1,7 +1,7 @@
 #!/bin/bash
 #Script to build the docker image and push it to ECR
 
-APP_DIR="../app/"
+APP_DIR="../"
 ECR_URL="741821171867.dkr.ecr.us-east-1.amazonaws.com/helloworld"
 DOCKER_TAG="helloworld"
 

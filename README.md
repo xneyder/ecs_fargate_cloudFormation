@@ -4,7 +4,7 @@
 
 ## What is the puropose of the exercise?
 
-The purpose of this repository is to be able to build form a single script all the infrastructure to serve a dockerized web application. It also includes the pipeline so when developers push changes to the repository it will automatically build the docker image, push it to the ECR repository and then deploy it to the Fargate Service.
+The purpose of this repository is to be able to build from a single script all the infrastructure to serve a dockerized web application. It also includes the pipeline so when developers push changes to the repository it will automatically build the docker image, push it to the ECR repository and then deploy it to the Fargate Service.
 
 We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is reached it will trigger and autoscalling target to scale out adding more tasks, and in the other direction if the alarm is cleared it will trigger the scale in to remove ECS tasks.
 
@@ -95,10 +95,45 @@ The token must have access to the `repo` scope. Store this token somewhere.
 ### 4. Get the ELB url
 
 
-### 5. Test the app
+### 5. Test the webapp access
 
 ```console
 curl ${ELB_ADDRESS}
 ```
+
+### 6. Test the CodePipeline
+
+Do some changes to the app.py script
+
+```console
+git add --all
+git commit -m 'Changes on the app'
+git push origin master
+```
+
+After a few minutes if you access the webapp you should see the changes done on the app.py script
+
+```console
+curl ${ELB_ADDRESS}
+```
+
+### 7. Test the autoscalling
+
+We are going to fill the SQS with dummy messages
+
+```console
+cd scripts
+python send_sqs_messages.py
+```
+
+After about 5 minutes the cloudwatch alarm will detect that the number of messages is more than 10 so it will trigger the scale out policy. To test it you can go to the console and see that the number of running tasks has increased.
+
+Kill the send_sqs_messages.py and run the consume SQS messages to clear the alarm and scale in.
+
+```console
+cd scripts
+python consume_sqs_messages.py
+```
+
 
 

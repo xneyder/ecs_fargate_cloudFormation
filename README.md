@@ -60,7 +60,7 @@ Deletes the docker images and the AWS stacks
 
 - python 2.7
 - boto3 (pip install boto3)
-- ruamel.yaml (pip install ruamel.yaml)
+- python sh module (pip install sh)
 - A copy of this repository (so that you can integrate with AWS Code Pipeline)
 - [Docker](https://docs.docker.com/compose/)
 - [AWS CLI](https://github.com/aws/aws-cli) version >= `1.14.11` configured to use the `us-east-1` as its default region (for Fargate support)

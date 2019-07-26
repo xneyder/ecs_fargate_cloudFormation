@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2019-07-24'
+Description: VPC for ECS
+
+
+Resources:
+
+	VPC:
+		Type: 'AWS::EC2::VPC'
+
+	Subnet1:
+
+	Subnet2:
+

@@ -1,0 +1,288 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a service on AWS Fargate, hosted in a private subnet, but accessible via a public load balancer.
+Parameters:
+  
+  StackName:
+    Type: String
+    Default: vpc
+    Description: The name of the parent Fargate networking stack that you created. Necessary
+                 to locate and reference resources created by that stack.
+  SQSQueueName:
+    Type: String
+    Default: AutoScallingQueue.fifo
+    Description: SQS to demostrate autoscalling triggered by the size of the SQL queue
+
+  LogGroupName:
+    Type: String
+    Default: helloworld
+    Description: CloudWtach log group for th container log files
+
+  ServiceName:
+    Type: String
+    Default: helloworld
+    Description: A name for the service
+
+  ImageUrl:
+    Type: String
+    Default: 741821171867.dkr.ecr.us-east-1.amazonaws.com/helloworld:latest
+    Description: The url of a docker image that contains the application process that
+                 will handle the traffic for this service
+  ContainerPort:
+    Type: Number
+    Default: 80
+    Description: What port number the application inside the docker container is binding to
+  ContainerCpu:
+    Type: Number
+    Default: 256
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  ContainerMemory:
+    Type: Number
+    Default: 512
+    Description: How much memory in megabytes to give the container
+  Path:
+    Type: String
+    Default: "*"
+    Description: A path on the public load balancer that this service
+                 should be connected to. Use * to send all load balancer
+                 traffic to this service.
+  Priority:
+    Type: Number
+    Default: 1
+    Description: The priority for the routing rule added to the load balancer.
+                 This only applies if your have multiple services which have been
+                 assigned to different paths on the load balancer.
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
+
+  ASGMin:
+    Type: Number
+    Default: 1
+    Description: Minimun Tasks running in the AutoScalling
+
+  ASGMax:
+    Type: Number
+    Default: 10
+    Description: Max Tasks running in the AutoScalling
+
+  Role:
+    Type: String
+    Default: ""
+    Description: (Optional) An IAM role to give the service's containers if the code within needs to
+                 access other AWS resources like S3 buckets, DynamoDB tables, etc
+
+Conditions:
+  HasCustomRole: !Not [ !Equals [!Ref 'Role', ''] ]
+
+Resources:
+
+  #CloudWatch Log group for the container logging
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Ref LogGroupName
+      RetentionInDays: 1
+
+  # The task definition. This is a simple metadata description of what
+  # container to run, and what resource requirements it has.
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Ref 'ServiceName'
+      Cpu: !Ref 'ContainerCpu'
+      Memory: !Ref 'ContainerMemory'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'StackName', 'ECSTaskExecutionRole']]
+      TaskRoleArn:
+        Fn::If:
+          - 'HasCustomRole'
+          - !Ref 'Role'
+          - !Ref "AWS::NoValue"
+      ContainerDefinitions:
+        - Name: !Ref 'ServiceName'
+          Cpu: !Ref 'ContainerCpu'
+          Memory: !Ref 'ContainerMemory'
+          Image: !Ref 'ImageUrl'
+          PortMappings:
+            - ContainerPort: !Ref 'ContainerPort'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroupName
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: 'helloworld'
+
+
+
+  # The service. The service is a resource which allows you to run multiple
+  # copies of a type of task, and gather up their logs and metrics, as well
+  # as monitor the number of running tasks and replace any that have crashed
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: LoadBalancerRule
+    Properties:
+      ServiceName: !Ref 'ServiceName'
+      Cluster:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'StackName', 'ClusterName']]
+      LaunchType: FARGATE
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      DesiredCount: !Ref 'DesiredCount'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - Fn::ImportValue:
+                !Join [':', [!Ref 'StackName', 'FargateContainerSecurityGroup']]
+          Subnets:
+            - Fn::ImportValue:
+                !Join [':', [!Ref 'StackName', 'PrivateSubnetOne']]
+            - Fn::ImportValue:
+                !Join [':', [!Ref 'StackName', 'PrivateSubnetTwo']]
+      TaskDefinition: !Ref 'TaskDefinition'
+      LoadBalancers:
+        - ContainerName: !Ref 'ServiceName'
+          ContainerPort: !Ref 'ContainerPort'
+          TargetGroupArn: !Ref 'TargetGroup'
+
+  # A target group. This is used for keeping track of all the tasks, and
+  # what IP addresses / port numbers they have. You can query it yourself,
+  # to use the addresses yourself, but most often this target group is just
+  # connected to an application load balancer, or network load balancer, so
+  # it can automatically distribute traffic across all the targets.
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 6
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      TargetType: ip
+      Name: !Ref 'ServiceName'
+      Port: !Ref 'ContainerPort'
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'StackName', 'VPCId']]
+
+  # Create a rule on the load balancer for routing traffic to the target group
+  LoadBalancerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - TargetGroupArn: !Ref 'TargetGroup'
+          Type: 'forward'
+      Conditions:
+        - Field: path-pattern
+          Values: [!Ref 'Path']
+      ListenerArn:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'StackName', 'PublicListener']]
+      Priority: !Ref 'Priority'
+
+  #Create the Autoscalling Target
+  AutoScallingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: Service
+    Properties:
+      MaxCapacity: !Ref 'ASGMax'
+      MinCapacity: !Ref 'ASGMin'
+      ResourceId: 
+        Fn::Join:
+          - "/"
+          - - service
+            - Fn::ImportValue: 
+                !Join [':', [!Ref 'StackName', 'ClusterName']]
+            - !Ref 'ServiceName'
+      RoleARN:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'StackName', 'AutoScalingRole']]
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+
+  #AutoScalling Policies
+  ScaleUp:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: PolicyScaleUp
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref "AutoScallingTarget"
+      StepScalingPolicyConfiguration:
+        Cooldown: 60
+        MetricAggregationType: "Average"
+        AdjustmentType: "ChangeInCapacity"
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 2
+  ScaleDown:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: PolicyScaleDown
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref "AutoScallingTarget"
+      StepScalingPolicyConfiguration:
+        Cooldown: 60
+        MetricAggregationType: "Average"
+        AdjustmentType: "ChangeInCapacity"
+        StepAdjustments:
+          - MetricIntervalUpperBound: -1
+            ScalingAdjustment: -2
+  # AutoScalingPolicy:
+  #   Type: AWS::ApplicationAutoScaling::ScalingPolicy
+  #   Properties:
+  #     PolicyName: PolicyScaleUp
+  #     PolicyType: TargetTrackingScaling
+  #     ScalingTargetId: !Ref "AutoScallingTarget"
+  #     TargetTrackingScalingPolicyConfiguration:
+  #       PredefinedMetricSpecification:
+  #         PredefinedMetricType: ECSServiceAverageCPUUtilization
+  #       ScaleInCooldown: 10
+  #       ScaleOutCooldown: 10
+  #       # Keep things at or lower than 50% CPU utilization, for example
+  #       TargetValue: 20
+
+  #Cloudwtach alarm, monitors the sqs queue of the app and sends the alarm to ScaleUp or ScaleDown
+  SQSAlarm:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmName: "SQSAlarm"
+      AlarmDescription: "Trigger scaling based on SQS queue"
+      Namespace: "AWS/SQS"
+      MetricName: "ApproximateNumberOfMessagesVisible"
+      ComparisonOperator: "GreaterThanThreshold"
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref "SQSQueueName"
+      EvaluationPeriods: 1
+      Period: 60
+      Statistic: 'Average'
+      Threshold: 10
+      AlarmActions:
+        - !Ref "ScaleUp"
+      OKActions:
+        - !Ref "ScaleDown"
+
+  #Create the SQS Queue used by the python app to demostrate cloudwatch alarms and autoscalling
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      QueueName: !Ref SQSQueueName
+      ContentBasedDeduplication: true
+
+Outputs:
+  ServiceName:
+    Description: The name of the ECS service
+    Value: !Ref 'ServiceName'
+    Export:
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ServiceName' ] ]
+

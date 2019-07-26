@@ -10,38 +10,38 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 
 ## CloudFormation Templates
 ### 1. vpc.yml
--VPC
--2 public subnets in 2 availability zones
--2 private subnets in 2 availability zones
--Internet Gateway
--Public table and associations
--NAT Gateway
--Private table and associations
--ECR Repository
--ECS Cluster
--Security Groups
--Public Elastic Load Balancer
--Private Application Load Balancer
--ECS Role
--ECR Role
--Autoscalling Role
+- VPC
+- 2 public subnets in 2 availability zones
+- 2 private subnets in 2 availability zones
+- Internet Gateway
+- Public table and associations
+- NAT Gateway
+- Private table and associations
+- ECR Repository
+- ECS Cluster
+- Security Groups
+- Public Elastic Load Balancer
+- Private Application Load Balancer
+- ECS Role
+- ECR Role
+- Autoscalling Role
 
 ### 2. ecs.yml
--CloudWatch Log Group
--ECS Task definition
--ECS Service
--Load Balancer Target Group
--Load Balancer Rule
--Autoscalling Target
--Scaling Policies
--Cloud Watch Alarm
--SQS queue
+- CloudWatch Log Group
+- ECS Task definition
+- ECS Service
+- Load Balancer Target Group
+- Load Balancer Rule
+- Autoscalling Target
+- Scaling Policies
+- Cloud Watch Alarm
+- SQS queue
 
 ### 3. pipeline.yml
--CodeBuild service role
--CodePipeline Service role
--CodeBuild
--CodePipeline
+- CodeBuild service role
+- CodePipeline Service role
+- CodeBuild
+- CodePipeline
 
 ## Scripts
 ### 1. deploy_system.py

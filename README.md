@@ -114,7 +114,7 @@ git push origin master
 After a few minutes if you access the webapp you should see the changes done on the app.py script
 
 ```console
-curl ${ELB_ADDRESS}
+curl `aws cloudformation describe-stacks --stack-name vpc --query "Stacks[0].Outputs[?OutputKey=='ExternalUrl'].OutputValue" --output text`
 ```
 
 ### 6. Test the autoscalling

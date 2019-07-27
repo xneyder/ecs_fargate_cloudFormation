@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy a service on AWS Fargate, hosted in a private subnet, but accessible via a public load balancer.
 Parameters:
-  
+
   StackName:
     Type: String
     Default: vpc
@@ -22,11 +22,6 @@ Parameters:
     Default: helloworld
     Description: A name for the service
 
-  ImageUrl:
-    Type: String
-    Default: 741821171867.dkr.ecr.us-east-1.amazonaws.com/helloworld:latest
-    Description: The url of a docker image that contains the application process that
-                 will handle the traffic for this service
   ContainerPort:
     Type: Number
     Default: 80
@@ -107,7 +102,9 @@ Resources:
         - Name: !Ref 'ServiceName'
           Cpu: !Ref 'ContainerCpu'
           Memory: !Ref 'ContainerMemory'
-          Image: !Ref 'ImageUrl'
+          Image: 
+            Fn::ImportValue:
+              !Join [':', [!Ref 'StackName', 'ECRRepositoryUrl']]
           PortMappings:
             - ContainerPort: !Ref 'ContainerPort'
           LogConfiguration:

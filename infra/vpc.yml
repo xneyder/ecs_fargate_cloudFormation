@@ -440,6 +440,11 @@ Outputs:
     Value: !Ref 'ECRRepository'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ECRRepositoryName' ] ]
+  ECRRepositoryUrl:
+    Description: The URL of the ECR repository
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepository}"
+    Export:
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ECRRepositoryUrl' ] ]
   InternalUrl:
     Description: The url of the internal load balancer
     Value: !Join ['', ['http://', !GetAtt 'PrivateLoadBalancer.DNSName']]

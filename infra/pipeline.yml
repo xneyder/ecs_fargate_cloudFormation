@@ -164,7 +164,10 @@ Resources:
           - Name: AWS_DEFAULT_REGION
             Value: !Ref AWS::Region
           - Name: REPOSITORY_URI
-            Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Repository}
+            # Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Repository}
+            Value:
+              Fn::ImportValue:
+                !Join [':', [!Ref 'VpcStackName', 'ECRRepositoryUrl']]
       Name: !Ref AWS::StackName
       ServiceRole: !Ref CodeBuildServiceRole
 

@@ -45,15 +45,28 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 
 ## Scripts
 ### 1. deploy.py
-Main script that creates the image and builds the stacks on AWS
+Main script which uses the was cli for creating the Docker image and creating the stacks on AWS. Here are the main steps:
+- Creates the vpc stack.
+- Builds the Docker image using the docker_image.sh script mentioned below.
+- Creates the ecs stack.
+- Creates the pipeline stack.
+
 ### 2. docker_image.sh
-Creates the initial Docker image and pushes it to the ECR repository
+Receives the ecr repository Url as parameter, then it builds the docker image using the Dockerfile found in the root of this repository, once the image is built then it is pushed to the ecr repository.
+
 ### 3. send_sqs_messages.py
-Sends messages to the SQS queue in order to test the CloudWatch alarm and the scale out policy
+Uses the boto3 python module to send messages to the SQS queue in order to test the CloudWatch alarm and the scale out policy.
+
 ### 4. consume_sqs_messages.py
-Consumes messages from the SQS queue in order to test the CloudWatch alarm and scale in policy
+Uses the boto3 python module to consume messages from the SQS queue in order to test the CloudWatch clear alarm and the scale in policy.
+
 ### 5. destroy.py
-Deletes the docker images and the AWS stacks
+This script uses the was cli and is used to delete all the stacks and the docker images.
+- Deletes the pipeline stack.
+- Deletes the ecs atack.
+- Deletes all the images pushed to the ecr repository.
+- Deletes the vpc stack.
+
 
 ## Deploy to AWS
 ### 0. Prerequisites
@@ -63,7 +76,7 @@ Deletes the docker images and the AWS stacks
 - python sh module (pip install sh)
 - A copy of this repository (so that you can integrate with AWS Code Pipeline)
 - [Docker](https://docs.docker.com/compose/)
-- [AWS CLI](https://github.com/aws/aws-cli) version >= `1.14.11` configured to use the `us-east-1` as its default region (for Fargate support)
+- [AWS CLI](https://github.com/aws/aws-cli) version >= `1.14.11` configure with the user keys.
 - an AWS [access key id and secret access key](http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) which has admin-level permissions for your AWS account
 
 ### 1. Fork the GitHub repository

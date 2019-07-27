@@ -45,7 +45,7 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 
 ## Scripts
 ### 1. deploy.py
-Main script which uses the aws cli for creating the Docker image and the stacks on AWS. Here are the main steps:
+Main script which uses the aws cli for creating the stacks on AWS. Here are the main steps:
 - Creates the vpc stack.
 - Builds the Docker image using the docker_image.sh script mentioned below.
 - Creates the ecs stack.

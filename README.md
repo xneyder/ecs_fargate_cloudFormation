@@ -6,7 +6,7 @@
 
 The purpose of this repository is to be able to build from a single script all the infrastructure to serve a dockerized web application. It also includes the pipeline so when developers push changes to the repository it will automatically build the docker image, push it to the ECR repository and then deploy it to the Fargate Service.
 
-We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is reached it will trigger and autoscalling target to scale out adding more tasks, and in the other direction if the alarm is cleared it will trigger the scale in to remove ECS tasks.
+We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is reached it will trigger and auto scaling target to scale out adding more tasks, and in the other direction if the alarm is cleared it will trigger the scale in to remove ECS tasks.
 
 ## CloudFormation Templates
 ### 1. vpc.yml
@@ -14,9 +14,9 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 - 2 public subnets in 2 availability zones
 - 2 private subnets in 2 availability zones
 - Internet Gateway
-- Public table and associations
+- Public routing table and associations
 - NAT Gateway
-- Private table and associations
+- Private routing table and associations
 - ECR Repository
 - ECS Cluster
 - Security Groups
@@ -24,7 +24,7 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 - Private Application Load Balancer
 - ECS Role
 - ECR Role
-- Autoscalling Role
+- Auto scaling Role
 
 ### 2. ecs.yml
 - CloudWatch Log Group
@@ -32,14 +32,14 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 - ECS Service
 - Load Balancer Target Group
 - Load Balancer Rule
-- Autoscalling Target
-- Scaling Policies
+- Auto scaling Target
+- Auto Scaling Policies
 - Cloud Watch Alarm
 - SQS queue
 
 ### 3. pipeline.yml
 - CodeBuild service role
-- CodePipeline Service role
+- CodePipeline service role
 - CodeBuild
 - CodePipeline
 
@@ -84,6 +84,8 @@ directory, which contains all the required files.
 
 ### 2. Create a GitHub Personal Token used for the CI Pipeline
 Go [here](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)
+and follow the steps to create a personal access token for AWS Code Pipeline.
+The token must have access to the `repo` scope. Store this token somewhere.
 
 ### 3. execute the deploy.py script
 
@@ -91,9 +93,6 @@ Go [here](https://help.github.com/articles/creating-a-personal-access-token-for-
 cd scripts
 python deploy.py -k [Github Token key]
 ```
-
-and follow the steps to create a personal access token for AWS Code Pipeline.
-The token must have access to the `repo` scope. Store this token somewhere.
 
 ### 4. Test the webapp access
 
@@ -117,7 +116,7 @@ After a few minutes if you access the webapp you should see the changes done on 
 curl `aws cloudformation describe-stacks --stack-name vpc --query "Stacks[0].Outputs[?OutputKey=='ExternalUrl'].OutputValue" --output text`
 ```
 
-### 6. Test the autoscalling
+### 6. Test the Auto scaling
 
 We are going to fill the SQS with dummy messages
 
@@ -128,7 +127,7 @@ python send_sqs_messages.py
 
 After about 5 minutes the cloudwatch alarm will detect that the number of messages is more than 10 so it will trigger the scale out policy. To test it you can go to the AWS console and see that the number of running tasks has increased by 2.
 
-Kill the send_sqs_messages.py and run the consume SQS messages to clear the alarm and trigger the scale in policy.
+Kill the send_sqs_messages.py and run the consume SQS messages script to clear the alarm and trigger the scale in policy.
 
 ```console
 cd scripts

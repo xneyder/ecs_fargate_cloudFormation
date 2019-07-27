@@ -19,6 +19,25 @@ def parse_args():
 	args=parser.parse_args()
 	github_key=args.key
 
+def wait_for_creation(stack_name):
+	"""
+	Waits for the given stack to be created
+	"""
+	try:
+		print("Waiting for stack {stack_name} to be created".format(
+			stack_name=stack_name))
+		sh.aws("cloudformation",
+			"wait",
+			"stack-create-complete",
+			"--stack-name",
+			stack_name
+		)
+		print("stack {stack_name} created".format(
+			stack_name=stack_name))
+	except Exception as e:
+		print(traceback.format_exc())
+	
+
 def main():
 	"""
 	main function
@@ -38,29 +57,24 @@ def main():
 		)
 
 		#Wait for stack to be created
-		print("Waiting for stack {vpc_stack_name} to be created".format(
-			vpc_stack_name=vpc_stack_name))
-		sh.aws("cloudformation",
-			"wait",
-			"stack-create-complete",
-			"--stack-name",
-			vpc_stack_name
-		)
-		print("stack {vpc_stack_name} created".format(
-			vpc_stack_name=vpc_stack_name))
+		wait_for_creation(vpc_stack_name)
 	except Exception as e:
 		print(traceback.format_exc())
 
 	#Get the ECR Url
-	ecrUrl=sh.aws("cloudformation",
-		"describe-stacks",
-		"--stack-name",
-		vpc_stack_name,
-		"--query",
-		"Stacks[0].Outputs[?OutputKey=='ECRRepositoryUrl'].OutputValue",
-		"--output",
-		"text"
-	)
+	try:
+		ecrUrl=sh.aws("cloudformation",
+			"describe-stacks",
+			"--stack-name",
+			vpc_stack_name,
+			"--query",
+			"Stacks[0].Outputs[?OutputKey=='ECRRepositoryUrl'].OutputValue",
+			"--output",
+			"text"
+		)
+	except Exception as e:
+		print(traceback.format_exc())
+
 	#Build the image and push it to ECR
 	print('Building Docker image and pushing it to {ecrUrl}'.format(
 		ecrUrl=ecrUrl))
@@ -79,16 +93,7 @@ def main():
 		)
 
 		#Wait for stack to be created
-		print("Waiting for stack {ecs_stack_name} to be created".format(
-			ecs_stack_name=ecs_stack_name))
-		sh.aws("cloudformation",
-			"wait",
-			"stack-create-complete",
-			"--stack-name",
-			ecs_stack_name
-		)
-		print("stack {ecs_stack_name} created".format(
-			ecs_stack_name=ecs_stack_name))
+		wait_for_creation(ecs_stack_name)
 	except Exception as e:
 		print(traceback.format_exc())
 
@@ -109,16 +114,7 @@ def main():
 		)
 
 		#Wait for stack to be created
-		print("Waiting for stack {pipeline_stack_name} to be created".format(
-			pipeline_stack_name=pipeline_stack_name))
-		sh.aws("cloudformation",
-			"wait",
-			"stack-create-complete",
-			"--stack-name",
-			pipeline_stack_name
-		)
-		print("stack {pipeline_stack_name} created".format(
-			pipeline_stack_name=pipeline_stack_name))
+		wait_for_creation(pipeline_stack_name)
 	except Exception as e:
 		print(traceback.format_exc())
 

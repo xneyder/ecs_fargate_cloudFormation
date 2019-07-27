@@ -4,6 +4,7 @@ import os
 import sh
 import traceback
 import json
+import time
 
 def delete_images(ecrName):
 	"""
@@ -17,7 +18,7 @@ def delete_images(ecrName):
 			"list-images",
 			"--repository-name",
 			ecrName
-		)	
+		)
 		#Remove all images
 		imageList=json.loads(str(imageList))
 		for image in imageList['imageIds']:
@@ -79,6 +80,8 @@ def main():
 			"--output",
 			"text"
 		)
+		ecrName=str(ecrName)
+		ecrName=ecrName.replace('\n','')
 		delete_images(ecrName)
 	except Exception as e:
 		print(traceback.format_exc())

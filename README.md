@@ -47,7 +47,7 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 ### 1. deploy.py
 Main script that creates the image and builds the stacks on AWS
 ### 2. docker_image.sh
-Created the initial Docker image and pushes it to the ECR repository
+Creates the initial Docker image and pushes it to the ECR repository
 ### 3. send_sqs_messages.py
 Sends messages to the SQS queue in order to test the CloudWatch alarm and the scale out policy
 ### 4. consume_sqs_messages.py
@@ -89,7 +89,7 @@ Go [here](https://help.github.com/articles/creating-a-personal-access-token-for-
 
 ```console
 cd scripts
-python deploy.py
+python deploy.py -k [Github Token key]
 ```
 
 and follow the steps to create a personal access token for AWS Code Pipeline.
@@ -126,9 +126,9 @@ cd scripts
 python send_sqs_messages.py
 ```
 
-After about 5 minutes the cloudwatch alarm will detect that the number of messages is more than 10 so it will trigger the scale out policy. To test it you can go to the console and see that the number of running tasks has increased.
+After about 5 minutes the cloudwatch alarm will detect that the number of messages is more than 10 so it will trigger the scale out policy. To test it you can go to the AWS console and see that the number of running tasks has increased by 2.
 
-Kill the send_sqs_messages.py and run the consume SQS messages to clear the alarm and scale in.
+Kill the send_sqs_messages.py and run the consume SQS messages to clear the alarm and trigger the scale in policy.
 
 ```console
 cd scripts

@@ -22,4 +22,4 @@ while True:
 	# Create a new message
 	response = queue.send_message(MessageBody=str(random.randint(1,1000)),MessageGroupId='1')
 	print(response.get('MessageId'))
-	time.sleep(1)
+	time.sleep(5)

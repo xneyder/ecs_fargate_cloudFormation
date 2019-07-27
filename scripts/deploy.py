@@ -1,7 +1,5 @@
 #!//usr/bin/python2
 import os
-import sys
-import boto3
 import argparse
 import sh
 import traceback

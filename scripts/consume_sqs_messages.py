@@ -24,4 +24,4 @@ while True:
 		message.delete()
 	if message==False:
 		break
-	time.sleep(1)
+	#time.sleep(1)

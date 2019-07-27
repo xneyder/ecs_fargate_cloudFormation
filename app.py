@@ -10,7 +10,7 @@ class SimpleClass(Resource):
 		Simple class returns the hello world in a dict
 	"""
 	def get(self):
-		return {'Hola': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'}
+		return {'Hola': 'Daniel !!!'}
 
 api.add_resource(SimpleClass, '/')
 

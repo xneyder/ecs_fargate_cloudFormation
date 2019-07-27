@@ -47,12 +47,12 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 ### 1. deploy.py
 Main script which uses the aws cli for creating the stacks on AWS. Here are the main steps:
 - Creates the vpc stack.
-- Builds the Docker image using the docker_image.sh script mentioned below.
+- Builds and pushes to ecr the Docker image using the docker_image.sh script mentioned below.
 - Creates the ecs stack.
 - Creates the pipeline stack.
 
 ### 2. docker_image.sh
-Receives the ecr repository Url as parameter, then it builds the docker image using the Dockerfile found in the root of this repository, once the image is built then it is pushed to the ecr repository.
+Receives the ecr repository Url as parameter, then it builds the docker image using the Dockerfile found in the root of this repository, once the image is built it is pushed to the ecr repository.
 
 ### 3. send_sqs_messages.py
 Uses the boto3 python module to send messages to the SQS queue in order to test the CloudWatch alarm and the auto scale out policy.

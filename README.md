@@ -44,7 +44,7 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 - CodePipeline
 
 ## Scripts
-### 1. deploy_system.py
+### 1. deploy.py
 Main script that creates the image and builds the stacks on AWS
 ### 2. docker_image.sh
 Created the initial Docker image and pushes it to the ECR repository
@@ -52,7 +52,7 @@ Created the initial Docker image and pushes it to the ECR repository
 Sends messages to the SQS queue in order to test the CloudWatch alarm and the scale out policy
 ### 4. consume_sqs_messages.py
 Consumes messages from the SQS queue in order to test the CloudWatch alarm and scale in policy
-### 5. destroy_system.py
+### 5. destroy.py
 Deletes the docker images and the AWS stacks
 
 ## Deploy to AWS
@@ -85,11 +85,11 @@ directory, which contains all the required files.
 ### 2. Create a GitHub Personal Token used for the CI Pipeline
 Go [here](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)
 
-### 3. execute the deploy_system.py script
+### 3. execute the deploy.py script
 
 ```console
 cd scripts
-python deploy_system.py
+python deploy.py
 ```
 
 and follow the steps to create a personal access token for AWS Code Pipeline.

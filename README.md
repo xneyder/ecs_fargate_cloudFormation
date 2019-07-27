@@ -61,7 +61,7 @@ Uses the boto3 python module to send messages to the SQS queue in order to test 
 Uses the boto3 python module to consume messages from the SQS queue in order to test the CloudWatch clear alarm and the auto scale in policy.
 
 ### 5. destroy.py
-This script uses the aws cli and is used to delete all the stacks and the docker images.
+This script uses the aws cli and it's purpose is to delete all the stacks and the docker images.
 - Deletes the pipeline stack.
 - Deletes the ecs stack.
 - Deletes all the images pushed to the ecr repository.

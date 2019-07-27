@@ -29,9 +29,6 @@ Parameters:
     Default: xneyder
 
 Resources:
-  Repository:
-    Type: AWS::ECR::Repository
-    DeletionPolicy: Retain
 
   CodeBuildServiceRole:
     Type: AWS::IAM::Role

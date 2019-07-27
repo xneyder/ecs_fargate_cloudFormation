@@ -95,16 +95,13 @@ python deploy.py
 and follow the steps to create a personal access token for AWS Code Pipeline.
 The token must have access to the `repo` scope. Store this token somewhere.
 
-### 4. Get the ELB url
-
-
-### 5. Test the webapp access
+### 4. Test the webapp access
 
 ```console
-curl ${ELB_ADDRESS}
+curl `aws cloudformation describe-stacks --stack-name vpc --query "Stacks[0].Outputs[?OutputKey=='ExternalUrl'].OutputValue" --output text`
 ```
 
-### 6. Test the CodePipeline
+### 5. Test the CodePipeline
 
 Do some changes to the app.py script
 
@@ -120,7 +117,7 @@ After a few minutes if you access the webapp you should see the changes done on 
 curl ${ELB_ADDRESS}
 ```
 
-### 7. Test the autoscalling
+### 6. Test the autoscalling
 
 We are going to fill the SQS with dummy messages
 
@@ -143,9 +140,6 @@ python consume_sqs_messages.py
 - [ ] SSL
 - [ ] Route53
 - [ ] ensure that the ALB path is configured correctly (add more paths to app)
-- [x] Code Pipeline + Code Deploy
 - [ ] RDS instance + app to read database
-- [x] deploy script
-- [x] destroy script
 
 

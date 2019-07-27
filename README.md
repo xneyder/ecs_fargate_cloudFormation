@@ -45,7 +45,7 @@ We defined a CloudWatch Alarm to monitor an SQS queue and if the threshold is re
 
 ## Scripts
 ### 1. deploy.py
-Main script which uses the was cli for creating the Docker image and creating the stacks on AWS. Here are the main steps:
+Main script which uses the aws cli for creating the Docker image and the stacks on AWS. Here are the main steps:
 - Creates the vpc stack.
 - Builds the Docker image using the docker_image.sh script mentioned below.
 - Creates the ecs stack.
@@ -55,15 +55,15 @@ Main script which uses the was cli for creating the Docker image and creating th
 Receives the ecr repository Url as parameter, then it builds the docker image using the Dockerfile found in the root of this repository, once the image is built then it is pushed to the ecr repository.
 
 ### 3. send_sqs_messages.py
-Uses the boto3 python module to send messages to the SQS queue in order to test the CloudWatch alarm and the scale out policy.
+Uses the boto3 python module to send messages to the SQS queue in order to test the CloudWatch alarm and the auto scale out policy.
 
 ### 4. consume_sqs_messages.py
-Uses the boto3 python module to consume messages from the SQS queue in order to test the CloudWatch clear alarm and the scale in policy.
+Uses the boto3 python module to consume messages from the SQS queue in order to test the CloudWatch clear alarm and the auto scale in policy.
 
 ### 5. destroy.py
-This script uses the was cli and is used to delete all the stacks and the docker images.
+This script uses the aws cli and is used to delete all the stacks and the docker images.
 - Deletes the pipeline stack.
-- Deletes the ecs atack.
+- Deletes the ecs stack.
 - Deletes all the images pushed to the ecr repository.
 - Deletes the vpc stack.
 

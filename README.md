@@ -151,7 +151,5 @@ python consume_sqs_messages.py
 
 - [ ] SSL
 - [ ] Route53
-- [ ] ensure that the ALB path is configured correctly (add more paths to app)
-- [ ] RDS instance + app to read database
 
 
